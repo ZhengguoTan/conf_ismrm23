@@ -1,2 +1,3 @@
 # conf_ismrm23
-The repository hosts the presentation in ismrm 2023
+
+The repository hosts the presentation in ISMRM 2023
