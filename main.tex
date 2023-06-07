@@ -1,0 +1,213 @@
+\documentclass[hyperref={colorlinks=true,linkcolor=blue}, aspectratio=169]{beamer}
+
+\usepackage{animate}
+
+\usepackage{booktabs}
+\setbeamertemplate{caption}[numbered]
+\setbeamertemplate{footline}[frame number]
+\setbeamertemplate{navigation symbols}{}
+
+\usepackage{amsmath}
+\newcommand*{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\argmin}{\arg\!\min}
+
+\usepackage{color,soul}
+\usepackage{colortbl}
+
+\setbeamerfont{footnote}{size=\tiny}
+
+\usepackage{listings,lstautogobble}
+\lstset{language=Python,
+	basicstyle=\scriptsize\ttfamily,
+	commentstyle=\ttfamily\itshape\color{gray},
+	showstringspaces=false,
+	autogobble=true
+}
+
+\usepackage{caption}
+\captionsetup{justification=centering,margin=1cm}
+\usepackage{subcaption}
+
+\usepackage{multirow}
+
+\usepackage{siunitx}
+\usepackage{tikz}
+\tikzstyle{process} = [rectangle, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=orange!30]
+\usetikzlibrary{shapes,positioning}
+\usepackage{ulem}
+
+\AtBeginSection[]{
+	\begin{frame}
+		\vfill
+		\centering
+		\begin{beamercolorbox}[sep=8pt,center,shadow=true,rounded=true]{title}
+			\usebeamerfont{title}\insertsectionhead\par%
+		\end{beamercolorbox}
+		\vfill
+	\end{frame}
+}
+
+\addtobeamertemplate{footnote}{\hskip -2em}{}
+
+\usepackage[capitalise,noabbrev]{cleveref}
+\usepackage[numbers,sort&compress]{natbib}
+\bibliographystyle{unsrt}
+
+\setbeamercolor{block title}{fg=black,bg=yellow}
+
+\title{In vivo 7~T diffusion MRI: \\High spatio-angular-temporal resolution pursuit}
+\author[Z Tan]{Zhengguo Tan \inst{1}, Patrick A Liebig \inst{2}, Robin M Heidemann \inst{2}, Frederik B Laun \inst{3}, Florian Knoll \inst{1}}
+\institute{\inst{1} Artificial Intelligence in Biomedical Engineering, University of Erlangen-Nuremberg, Erlangen, Germany \\
+\inst{2} Siemens AG, Erlangen, Germany \\
+\inst{3} Institute of Radiology, University Hospital Erlangen, Erlangen, Germany}
+\date{07 June 2023}
+
+\begin{document}
+	
+	\frame{\titlepage}
+
+	% ================= %	
+	\section{Motivation: In vivo Diffusion MRI at 7~T}
+	
+	\begin{frame}{MUSE \footnote{Chen NK, et al. A robust multi-shot scan strategy for high-resolution diffusion weighted MRI enabled by multiplexed sensitivity-encoding (MUSE). \textit{NeuroImage} (2013). doi:~\href{https://doi.org/10.1016/j.neuroimage.2013.01.038}{10.1016/j.neuroimage.2013.01.038}} faces challenges in ultra-high field}
+		\begin{itemize}
+			\item [\checkmark] MUSE: self-gated multi-shot interleaved EPI (iEPI) DWI reconstruction
+		\end{itemize} 
+		\begin{figure}
+			\includegraphics[width=0.7\textwidth]{figures/4-shot.png}
+		\end{figure}
+		\vspace{0.5em}
+		\begin{itemize}
+			\item [$\star$] <1-> requires \uline{fully-sampled in-plane acquisition}
+			\item [$\star$] <2-> only limited number of shots have been reported
+			\item [$\star$] <3-> increases specific absorption rate (SAR) at ultra-high field
+		\end{itemize}
+	\end{frame}
+
+	\begin{frame}{Undersampled iEPI Acquisition and Joint $k$-$q$-Space Reconstruction}
+	This work presents preliminary results on 
+	\begin{enumerate}
+		\item undersampled iEPI acquisition to reduce scan time and to reduce SAR
+		\item joint $k$-$q$-space reconstruction to boost SNR
+	\end{enumerate}
+	\end{frame}
+
+	% ================= %
+	\section{Methods}
+	
+	\begin{frame}{Undersampled iEPI with Shift Encoding}
+		\begin{figure}
+			\includegraphics[width=0.7\textwidth]{figures/2-shot.png}
+		\end{figure}
+		\begin{itemize}
+			\item [(A)] <1-> Given the acceleration along $k_y$ as $R$ $\rightarrow$ $(R \times N_\mathrm{shot})$-fold undersampling per shot
+			\item [(B)] <2-> $k_y$ shift encoding along diffusion encoding $\rightarrow$ complementary $k$-$q$-space sampling
+		\end{itemize}
+	\end{frame}
+
+	\begin{frame}{In Vivo Acquisition}
+		\begin{columns}
+			\begin{column}{0.6\textwidth}
+				\begin{itemize}
+					\item three-shell diffusion sampling
+					\item \SI{1.4}{mm} isotropic resolution and 68 slices
+					\item $k_y$ undersampling $R = 3$, partial Fourier $6/8$
+					\vspace{1em}
+					\item 1- and 2-shot scans
+				\end{itemize}
+			\end{column}
+			\begin{column}{0.4\textwidth}
+				\begin{figure}
+					\includegraphics[width=\columnwidth]{figures/spheres_b2500.png}
+				\end{figure}
+			\end{column}
+		\end{columns}
+	\end{frame}
+
+	\begin{frame}{Joint $k$-$q$-Space Reconstruction}
+		Shot phase variation informed joint reconstruction:
+		
+		\begin{equation}
+			\mathrm{argmin}_{\mathbf{x}_q} \left\lVert \mathbf{y}_{c,q,s} - \mathbf{P}_{q,s} \mathbf{F} \mathbf{S}_c \{ e^{i \mathbf{\Phi}_{q,s}} \mathbf{x}_{q} \} \right\rVert_2^2 + \lambda \mathbf{R} (\mathbf{x}_q)
+		\end{equation}
+	
+		\begin{equation}
+			\begin{aligned}
+				\mathbf{x} &: \text{diffusion weight images}, \\
+				\mathbf{\Phi} &: \text{shot-to-shot phase variation}, \\
+				\mathbf{S} &: \text{coil sensitivity maps}, \\
+				\mathbf{F} &: \text{2D Fourier transform}, \\
+				\mathbf{P} &: \text{sampling mask}, \\
+				\mathbf{y} &: \text{measured raw data}.
+			\end{aligned}
+		\end{equation}
+		\vspace{0.5em}
+		Indices: $q$ - diffusion encoding; $s$ - shot; $c$ - coil
+	\end{frame}
+
+	\begin{frame}{Overlapping Locally Low Rank (LLR) Regularization}
+		\begin{columns}
+			\begin{column}{0.4\textwidth}
+				\begin{enumerate}
+					\item Stride set as 1, leading to overlapping local patches
+					\item Use local patches to create spatial-contrast (diffusion) matrices
+					\item singular value thresholding (SVT) \footnote{Cai JF, Candes EJ, Shen Z. A singular value thresholding algorithm for matrix completion. \textit{SIAM J Optim} (2010). doi: \href{https://doi.org/10.1137/080738970}{10.1137/080738970}} on these matrices
+					\item Backpass (adjoint) the SVT matrices back to full image matrices
+				\end{enumerate}
+			\end{column}
+			\begin{column}{0.6\textwidth}
+				\animategraphics[autoplay,loop,controls,width=\columnwidth]{1}{figures/llr/frame_}{0}{5}
+			\end{column}
+		\end{columns}
+	\end{frame}
+
+	% ================= %
+	\section{Results}
+	
+	\begin{frame}{1-Shot EPI: LLR Regularization Strength}
+		\begin{figure}
+			\includegraphics[width=0.8\textwidth]{figures/results/Pat3_PI_LLR_regu.png}
+		\end{figure}
+	\end{frame}
+
+	\begin{frame}{1-Shot EPI: Overlapping LLR}
+		\begin{figure}
+			\includegraphics[width=0.9\textwidth]{figures/results/DWI_LLR_OverlapBlocks.png}
+		\end{figure}
+	\end{frame}
+
+	\begin{frame}{2-Shot EPI: Parallel Imaging Reconstruction}
+		\begin{figure}
+			\includegraphics[width=0.75\textwidth]{figures/results/fig3_a.png}
+		\end{figure}
+	\end{frame}
+
+	\begin{frame}{2-Shot EPI: Overlapping LLR Regularization}
+		\begin{figure}
+			\includegraphics[width=0.75\textwidth]{figures/results/fig3_b.png}
+		\end{figure}
+	\end{frame}
+
+
+	% ================= %
+	\section{Conclusion}
+	
+	\begin{frame}{Conclusion}
+		
+		\begin{itemize}
+			\item <1-> Undersampled iEPI acquisition at ultra-high field
+			\vspace{1em}
+			\item <2-> Joint $k$-$q$-space reconstruction
+			\item <2-> Spatial-diffusion overlapping LLR regularization
+			\vspace{1em}
+			\item <3-> Preliminary in vivo results show better image quality compared to MUSE
+			\vspace{1em}
+			\item <4-> Please refer to: \\ \url{https://github.com/ZhengguoTan/demo_jets_diffusion_mri_7t.git} \\
+			for future updates!
+			\item <5-> MR-Pub III at Reproducible Research Study Group at 13:45 on Thursday
+			\vfill
+			\item <6-> \colorbox{yellow}{Thank You for Your Attention!}
+		\end{itemize}
+	\end{frame}
+
+\end{document}
