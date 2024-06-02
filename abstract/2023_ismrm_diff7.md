@@ -2,7 +2,7 @@
 
 ## In Vivo Diffusion MRI at 7T: High Spatial-Angular-Temporal Resolution Pursuit
 
-Frank Z. Tan, Patrick A. Liebig, Robin M. Heidemann, Frederik B. Laun, Florian Knoll
+Zhengguo Tan, Patrick A. Liebig, Robin M. Heidemann, Frederik B. Laun, Florian Knoll
 
 
 ### SYNOPSIS
